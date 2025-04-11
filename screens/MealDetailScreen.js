@@ -1,19 +1,43 @@
-import { useEffect } from "react";
+import { useContext, useLayoutEffect } from "react";
 import { StyleSheet, View, Text, Image, ScrollView } from "react-native"
 
 import { MEALS } from "../data/dummy-data"
 import Subtitle from "../components/MealDetail/Subtitle";
 import List from "../components/MealDetail/List";
+import IconButton from "../components/IconButton";
+
+import { FavoritesContext } from "../store/context/favorites-context"
 
 function MealDetailScreen({ route, navigation }) {
+    const favoriteMealsContext = useContext(FavoritesContext);
+
     const mealId = route.params.mealId
     const selectedMeal = MEALS.find((meal) => meal.id === mealId);
 
-    useEffect(() => {
-        navigation.setOptions({
+    const mealIsFavorite = favoriteMealsContext.ids.includes(mealId);
+
+    function headerButtonPressHandler() {
+      if (mealIsFavorite) {
+        favoriteMealsContext.removeFavorite(mealId); 
+      } else {
+        favoriteMealsContext.addFavorite(mealId);
+      }
+    }
+
+    useLayoutEffect(() => {
+      navigation.setOptions({
         title: selectedMeal.title,
-        });
-    }, [mealId, navigation]);
+        headerRight: () => {
+          return (
+            <IconButton
+              onPress={headerButtonPressHandler}
+              color={mealIsFavorite ? "#ffd024" : "gray"}
+              icon={mealIsFavorite ? "star" : "star-outline"}
+            />
+          );
+        },
+      });
+    }, [mealId, navigation, headerButtonPressHandler]);
 
     return (
       <ScrollView>
@@ -75,7 +99,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#444444",
     },
     detailItem:{
-        marginHorizontal: 5,
+        marginHorizontal: 15,
         fontSize: 15
     },
     listOuterContainer: {

@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         padding: 10
     },
     detailItem:{
-        marginHorizontal: 5,
+        marginHorizontal: 15,
         fontSize: 15
     }
 })
