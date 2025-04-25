@@ -101,6 +101,23 @@ function MealDetailScreen({ route, navigation }) {
     });
   }
 
+  async function sendPushNotification() {
+    const pushTokenData = await Notifications.getExpoPushTokenAsync();
+    console.log("Send push notification")
+    console.log(pushTokenData)
+      fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: pushTokenData.data,
+          title:"Test added meal",
+          body: "Hello world"
+        })
+      });
+  }
+
   function headerButtonPressHandler() {
     if (mealIsFavorite) {
       // favoriteMealsContext.removeFavorite(mealId);
@@ -108,7 +125,8 @@ function MealDetailScreen({ route, navigation }) {
     } else {
       // favoriteMealsContext.addFavorite(mealId);
       dispatch(addFavorite({ id: mealId }));
-      sendLocalNotification();
+      //sendLocalNotification();
+      sendPushNotification();
     }
   }
 

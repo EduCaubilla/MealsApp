@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 
-import { StyleSheet, Button } from "react-native";
+import { StyleSheet, Button, Alert, Platform } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -15,6 +15,9 @@ import FavoritesScreen from "./screens/FavoritesScreen";
 
 // import FavoritesContextProvider from "./store/context/favorites-context";
 import { store } from "./store/redux/store";
+
+import * as Notifications from "expo-notifications"
+import { useEffect } from "react";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -56,6 +59,41 @@ function DrawerNavigation() {
 }
 
 export default function App() {
+  useEffect(() => {
+    async function configurePushNotifications() {
+      const { status } = await Notifications.getPermissionsAsync();
+      let finalStatus = status;
+      console.log("First status --->", status)
+      
+      if (finalStatus !== "granted") {
+        const { status } = Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        Alert.alert("Permission required", "To receive push notifications you must accept permission.");
+        return;
+      }
+
+      try {
+        const pushTokenData = await Notifications.getExpoPushTokenAsync();
+        console.log(pushTokenData)
+      } catch (error) {
+        console.log("Error getting push token data.")
+        console.log(error)
+      }
+
+      if(Platform.OS === "android"){
+        Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.DEFAULT
+        });
+      }
+    }
+
+    configurePushNotifications();
+  }, [])
+
   return (
     <>
       <StatusBar style="dark" />
